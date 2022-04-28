@@ -3,10 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = __importDefault(require("./src/app"));
-const dotenv_1 = __importDefault(require("dotenv"));
+var app_1 = __importDefault(require("./src/app"));
+var dotenv_1 = __importDefault(require("dotenv"));
+var app_2 = require("firebase/app");
+var firebaseConfig_1 = require("./firebaseConfig");
 dotenv_1.default.config();
-const port = process.env.PORT || 3001;
-app_1.default.listen(port, () => {
-    console.log(`Listening on port=${port}`);
+var port = process.env.PORT || 3001;
+(0, app_2.initializeApp)(firebaseConfig_1.firebaseConfig);
+app_1.default.listen(port, function () {
+    console.log("Listening on port=".concat(port));
 });
