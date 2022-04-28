@@ -1,6 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import container from './inversify';
+import { CommentsRouter } from './comments/comments_controller';
+import { CommentsService } from './comments/comments_service';
 
 const app = express();
 
@@ -8,8 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(helmet());
 
-app.get('/', (req: Request, res: Response, next: NextFunction) => {
-	res.send('Hello typescript');
-});
+const commentsService = container.get<CommentsService>(CommentsService);
+const commentsRouter = CommentsRouter(commentsService);
+app.use('/comments', commentsRouter);
 
 export default app;
