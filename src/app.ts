@@ -23,6 +23,7 @@ const container = new Container();
 container.bind<FirebaseCommentsRepo>(FirebaseCommentsRepo).toSelf();
 container.bind<CommentsService>(CommentsService).to(RedisCommentsService);
 
+// build server
 const server = new InversifyExpressServer(container, null, {
 	rootPath: '/api',
 });
@@ -34,6 +35,7 @@ server.setConfig((app) => {
 	app.use(helmet());
 	app.use(morgan('tiny'));
 });
-const app = server.build();
 
+// export server
+const app = server.build();
 export default app;
