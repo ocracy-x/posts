@@ -1,18 +1,39 @@
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import container from './inversify';
-import { CommentsRouter } from './comments/comments_controller';
-import { CommentsService } from './comments/comments_service';
+import morgan from 'morgan';
+import { Container } from 'inversify';
+import { InversifyExpressServer } from 'inversify-express-utils';
 
-const app = express();
+// load repos
+import { FirebaseCommentsRepo } from './comments/comments_repo';
 
-app.use(cors());
-app.use(express.json());
-app.use(helmet());
+// load services
+import {
+	CommentsService,
+	RedisCommentsService,
+} from './comments/comments_service';
 
-const commentsService = container.get<CommentsService>(CommentsService);
-const commentsRouter = CommentsRouter(commentsService);
-app.use('/comments', commentsRouter);
+// load controllers
+import './comments/comments_controller';
+
+// inject dependencies
+const container = new Container();
+container.bind<FirebaseCommentsRepo>(FirebaseCommentsRepo).toSelf();
+container.bind<CommentsService>(CommentsService).to(RedisCommentsService);
+
+const server = new InversifyExpressServer(container, null, {
+	rootPath: '/api',
+});
+
+// inject middleware
+server.setConfig((app) => {
+	app.use(cors());
+	app.use(express.json());
+	app.use(helmet());
+	app.use(morgan('tiny'));
+});
+const app = server.build();
 
 export default app;
