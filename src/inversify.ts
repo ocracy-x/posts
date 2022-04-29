@@ -1,6 +1,9 @@
 import { Container } from 'inversify';
 import { FirebaseCommentsRepo } from './comments/comments_repo';
-import { CommentsService, RedisCommentsService } from './comments/comments_service';
+import {
+	CommentsService,
+	RedisCommentsService,
+} from './comments/comments_service';
 
 const container = new Container();
 

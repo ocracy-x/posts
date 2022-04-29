@@ -10,6 +10,7 @@ export abstract class CommentsService {
 	}
 	abstract buildTree(postId: string): Comment[];
 }
+
 @injectable()
 export class RedisCommentsService extends CommentsService {
 	buildTree(postId: string): Comment[] {
