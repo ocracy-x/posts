@@ -29,7 +29,7 @@ const server = new InversifyExpressServer(container, null, {
 });
 
 // inject middleware
-server.setConfig((app) => {
+server.setConfig((app) => {``
 	app.use(cors());
 	app.use(express.json());
 	app.use(helmet());

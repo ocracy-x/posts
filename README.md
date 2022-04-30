@@ -20,6 +20,8 @@ Software design patterns
 
 Microservices Architecture
 * [Microservices - Atlassian](https://www.atlassian.com/continuous-delivery/microservices)
+* [What is RDBMS - Oracle](https://www.oracle.com/database/what-is-a-relational-database/)
+
 
 Writing good tests
 * [Behavior driven development (BDD) - Wikipedia](https://en.wikipedia.org/wiki/Behavior-driven_development)
