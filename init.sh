@@ -1,1 +1,0 @@
-export GOOGLE_APPLICATION_CREDENTIALS="./secrets/ocracy_gc.json"

@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Request, Response, NextFunction } from 'express';
 import { CommunitiesRepo, Community } from './communities.repo';
 
+import { inject } from 'inversify/lib/annotation/inject';
 import {
 	interfaces,
 	controller,
@@ -11,8 +12,6 @@ import {
 	httpPost,
 	queryParam,
 } from 'inversify-express-utils';
-import { inject } from 'inversify/lib/annotation/inject';
-import { resolve } from 'path';
 
 @controller('/v1/communities')
 export class CommunitiesController implements interfaces.Controller {

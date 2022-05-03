@@ -3,7 +3,6 @@ import {
 	DocumentSnapshot,
 	Firestore,
 } from '@google-cloud/firestore';
-import { rejects } from 'assert';
 import { Repo } from '../util';
 
 export class Community {
@@ -38,7 +37,9 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 			return new Community(data.name);
 		},
 	};
-	private store = new Firestore().collection(this.collection);
+	private store = new Firestore()
+		.collection(this.collection)
+		.withConverter(this.converter);
 
 	getAll(): Promise<Community[]> {
 		throw new Error('Method not implemented.');
