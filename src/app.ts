@@ -11,7 +11,7 @@ import { FirebaseCommentsRepo } from './comments/comments_repo';
 import {
 	CommunitiesFirestore,
 	CommunitiesRepo,
-} from './communities/communities_repo';
+} from './communities/communities.repo';
 
 // load services
 import {
@@ -21,7 +21,7 @@ import {
 
 // load controllers
 import './comments/comments_controller';
-import './communities/communities_controller';
+import './communities/communities.controller';
 
 // inject dependencies
 const container = new Container();

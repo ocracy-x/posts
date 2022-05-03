@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Request, Response, NextFunction } from 'express';
-import { CommunitiesRepo } from './communities_repo';
+import { CommunitiesRepo } from './communities.repo';
 
 import {
 	interfaces,
