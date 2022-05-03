@@ -10,12 +10,12 @@ export class Community {
 	toJson(): Object {
 		return {
 			name: this.name,
-			created_at: this.createdAt,
+			created_at: this.createdAt.toUTCString(),
 		};
 	}
 
 	static fromData(data: DocumentData): Community {
-		return new Community(data.name, data.created_at);
+		return new Community(data.name, new Date(data.created_at));
 	}
 }
 
@@ -41,8 +41,10 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		.collection(this.collection)
 		.withConverter(this.converter);
 
-	getAll(): Promise<Community[]> {
-		throw new Error('Method not implemented.');
+	async getAll(): Promise<Community[]> {
+		const snapshot = await this.store.get();
+		const docs = snapshot.docs.map((doc) => doc.data());
+		return docs;
 	}
 
 	async create(item: Community): Promise<Community> {
@@ -50,10 +52,18 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		return item;
 	}
 
+	async read(id: string): Promise<Community | undefined> {
+		const snapshot = await this.store.doc(id).get();
+		const doc = snapshot.data();
+		return doc;
+	}
+
 	update(item: Community): Promise<Community> {
 		throw new Error('Method not implemented.');
 	}
-	delete(item: Community): Promise<Community> {
-		throw new Error('Method not implemented.');
+
+	async delete(id: string): Promise<null> {
+		await this.store.doc(id).delete();
+		return null;
 	}
 }

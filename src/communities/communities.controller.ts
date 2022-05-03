@@ -10,6 +10,7 @@ import {
 	request,
 	response,
 	httpPost,
+	requestParam,
 } from 'inversify-express-utils';
 import faker from '@faker-js/faker';
 
@@ -24,6 +25,23 @@ export class CommunitiesController implements interfaces.Controller {
 		try {
 			const data = await this.communitiesRepo.getAll();
 			res.send(data);
+		} catch (err) {
+			res.sendStatus(500);
+		}
+	}
+
+	@httpGet('/:id')
+	private async getById(
+		@requestParam('id') id: string,
+		@response() res: Response,
+	) {
+		try {
+			const data = await this.communitiesRepo.read(id);
+			if (!data) {
+				res.status(404).send(`Community "${id}" not found`);
+			} else {
+				res.send(data);
+			}
 		} catch (_) {
 			res.sendStatus(500);
 		}
