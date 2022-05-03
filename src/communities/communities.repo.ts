@@ -6,17 +6,16 @@ import {
 import { Repo } from '../util';
 
 export class Community {
-	constructor(readonly name: string) {}
+	constructor(readonly name: string, readonly createdAt: Date = new Date()) {}
 	toJson(): Object {
 		return {
 			name: this.name,
+			created_at: this.createdAt,
 		};
 	}
 
-	static fromJson(json: Map<string, string>): Community {
-		const name = json.get('name');
-		if (name == null) throw Error('Community requires name');
-		return new Community(name);
+	static fromData(data: DocumentData): Community {
+		return new Community(data.name, data.created_at);
 	}
 }
 
@@ -33,10 +32,11 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		},
 		fromFirestore(snapshot: DocumentSnapshot): Community {
 			const data = snapshot.data();
-			if (!data) throw Error();
-			return new Community(data.name);
+			if (!data) throw Error('No data');
+			return Community.fromData(data);
 		},
 	};
+
 	private store = new Firestore()
 		.collection(this.collection)
 		.withConverter(this.converter);
@@ -44,8 +44,9 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 	getAll(): Promise<Community[]> {
 		throw new Error('Method not implemented.');
 	}
+
 	async create(item: Community): Promise<Community> {
-		await this.store.add(item);
+		await this.store.doc(item.name).set(item, { merge: false });
 		return item;
 	}
 

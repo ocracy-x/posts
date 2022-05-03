@@ -10,8 +10,8 @@ import {
 	request,
 	response,
 	httpPost,
-	queryParam,
 } from 'inversify-express-utils';
+import faker from '@faker-js/faker';
 
 @controller('/v1/communities')
 export class CommunitiesController implements interfaces.Controller {
@@ -24,29 +24,20 @@ export class CommunitiesController implements interfaces.Controller {
 		try {
 			const data = await this.communitiesRepo.getAll();
 			res.send(data);
-		} catch (err) {
-			res.status(500).send(err);
+		} catch (_) {
+			res.sendStatus(500);
 		}
 	}
 
 	@httpPost('/')
 	private async create(@request() req: Request, @response() res: Response) {
 		try {
-			const doc = new Community('hello');
+			const name = faker.animal.type();
+			const doc = new Community(name);
 			const data = await this.communitiesRepo.create(doc);
 			res.status(201).send(data);
-		} catch (err) {
-			res.status(500).send(err);
+		} catch (_) {
+			res.sendStatus(500);
 		}
-	}
-
-	@httpGet('/paginate')
-	private async paginate(
-		@queryParam('start') start: number,
-		@queryParam('count') count: number,
-		@response() res: Response,
-	) {
-		const str = `start=${start}, count=${count}`;
-		res.status(201).send(str);
 	}
 }
