@@ -8,6 +8,10 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 
 // load repos
 import { FirebaseCommentsRepo } from './comments/comments_repo';
+import {
+	CommunitiesFirestore,
+	CommunitiesRepo,
+} from './communities/communities_repo';
 
 // load services
 import {
@@ -17,10 +21,13 @@ import {
 
 // load controllers
 import './comments/comments_controller';
+import './communities/communities_controller';
 
 // inject dependencies
 const container = new Container();
+
 container.bind<FirebaseCommentsRepo>(FirebaseCommentsRepo).toSelf();
+container.bind<CommunitiesRepo>(CommunitiesRepo).to(CommunitiesFirestore);
 container.bind<CommentsService>(CommentsService).to(RedisCommentsService);
 
 // build server
@@ -29,7 +36,7 @@ const server = new InversifyExpressServer(container, null, {
 });
 
 // inject middleware
-server.setConfig((app) => {``
+server.setConfig((app) => {
 	app.use(cors());
 	app.use(express.json());
 	app.use(helmet());

@@ -4,9 +4,9 @@
   "description": "Posts microservice",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "sh ./init.sh && node dist/index.js",
+    "dev": "sh ./init.sh && nodemon index.ts",
     "build": "npm test && tsc",
-    "dev": "nodemon index.ts",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'"
   },
   "repository": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/ocracy-x/posts#readme",
   "dependencies": {
+    "@google-cloud/firestore": "^5.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.18.0",

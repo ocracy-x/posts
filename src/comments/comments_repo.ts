@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
+import { injectable } from 'inversify/lib/annotation/injectable';
 import { faker } from '@faker-js/faker';
 
 export class Comment {
