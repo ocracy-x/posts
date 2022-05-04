@@ -10,3 +10,7 @@ export abstract class Repo<T> {
 	abstract update(item: T): Promise<T>;
 	abstract delete(id: string): Promise<null>;
 }
+
+export interface Serializable<T> {
+	deserialize(input: Object): T;
+}

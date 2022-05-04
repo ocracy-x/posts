@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { Request, Response, NextFunction } from 'express';
 import { CommunitiesRepo, Community } from './communities.repo';
-
 import { inject } from 'inversify/lib/annotation/inject';
 import {
 	interfaces,
@@ -11,8 +10,8 @@ import {
 	response,
 	httpPost,
 	requestParam,
+	httpDelete,
 } from 'inversify-express-utils';
-import faker from '@faker-js/faker';
 
 @controller('/v1/communities')
 export class CommunitiesController implements interfaces.Controller {
@@ -50,11 +49,24 @@ export class CommunitiesController implements interfaces.Controller {
 	@httpPost('/')
 	private async create(@request() req: Request, @response() res: Response) {
 		try {
-			const name = faker.animal.type();
-			const doc = new Community(name);
-			const data = await this.communitiesRepo.create(doc);
+			const community = Community.fromJson(req.body);
+			const data = await this.communitiesRepo.create(community);
+			console.log(community, data);
 			res.status(201).send(data);
 		} catch (_) {
+			res.sendStatus(500);
+		}
+	}
+
+	@httpDelete('/:id')
+	private async deleteById(
+		@requestParam('id') id: string,
+		@response() res: Response,
+	) {
+		try {
+			await this.communitiesRepo.delete(id);
+			res.status(200).send('Resource deleted');
+		} catch {
 			res.sendStatus(500);
 		}
 	}

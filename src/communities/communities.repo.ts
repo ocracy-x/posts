@@ -10,12 +10,17 @@ export class Community {
 	toJson(): Object {
 		return {
 			name: this.name,
-			created_at: this.createdAt.toUTCString(),
+			createdAt: this.createdAt.toUTCString(),
 		};
 	}
 
-	static fromData(data: DocumentData): Community {
-		return new Community(data.name, new Date(data.created_at));
+	static fromJson(json: any): Community {
+		const createdAt = json.createdAt;
+		const doc = new Community(
+			json.name,
+			createdAt ? new Date(createdAt) : undefined,
+		);
+		return doc;
 	}
 }
 
@@ -33,7 +38,7 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		fromFirestore(snapshot: DocumentSnapshot): Community {
 			const data = snapshot.data();
 			if (!data) throw Error('No data');
-			return Community.fromData(data);
+			return Community.fromJson(data);
 		},
 	};
 
@@ -58,8 +63,9 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		return doc;
 	}
 
-	update(item: Community): Promise<Community> {
-		throw new Error('Method not implemented.');
+	async update(item: Community): Promise<Community> {
+		await this.store.doc(item.name).set(item, { merge: true });
+		return item;
 	}
 
 	async delete(id: string): Promise<null> {
