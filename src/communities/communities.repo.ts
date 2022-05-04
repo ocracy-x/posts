@@ -46,12 +46,6 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		.collection(this.collection)
 		.withConverter(this.converter);
 
-	async getAll(): Promise<Community[]> {
-		const snapshot = await this.store.get();
-		const docs = snapshot.docs.map((doc) => doc.data());
-		return docs;
-	}
-
 	async create(item: Community): Promise<Community> {
 		await this.store.doc(item.name).set(item, { merge: false });
 		return item;
@@ -68,8 +62,14 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		return item;
 	}
 
-	async delete(id: string): Promise<null> {
+	async delete(id: string): Promise<undefined> {
 		await this.store.doc(id).delete();
-		return null;
+		return;
+	}
+
+	async getAll(): Promise<Community[]> {
+		const snapshot = await this.store.get();
+		const docs = snapshot.docs.map((doc) => doc.data());
+		return docs;
 	}
 }

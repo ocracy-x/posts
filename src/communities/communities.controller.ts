@@ -19,16 +19,6 @@ export class CommunitiesController implements interfaces.Controller {
 		@inject(CommunitiesRepo) private communitiesRepo: CommunitiesRepo,
 	) {}
 
-	@httpGet('/')
-	private async get(@request() req: Request, @response() res: Response) {
-		try {
-			const data = await this.communitiesRepo.getAll();
-			res.send(data);
-		} catch (err) {
-			res.sendStatus(500);
-		}
-	}
-
 	@httpGet('/:id')
 	private async getById(
 		@requestParam('id') id: string,
@@ -67,6 +57,16 @@ export class CommunitiesController implements interfaces.Controller {
 			await this.communitiesRepo.delete(id);
 			res.status(200).send('Resource deleted');
 		} catch {
+			res.sendStatus(500);
+		}
+	}
+
+	@httpGet('/')
+	private async getAll(@request() req: Request, @response() res: Response) {
+		try {
+			const data = await this.communitiesRepo.getAll();
+			res.send(data);
+		} catch (err) {
 			res.sendStatus(500);
 		}
 	}
