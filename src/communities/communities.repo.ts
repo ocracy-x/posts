@@ -62,14 +62,13 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		return item;
 	}
 
-	async delete(id: string): Promise<undefined> {
-		await this.store.doc(id).delete();
-		return;
-	}
-
-	async getAll(): Promise<Community[]> {
-		const snapshot = await this.store.get();
-		const docs = snapshot.docs.map((doc) => doc.data());
-		return docs;
+	async delete(id: string): Promise<boolean> {
+		const doc = await this.store.doc(id).get();
+		if (doc.exists) {
+			await this.store.doc(id).delete();
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

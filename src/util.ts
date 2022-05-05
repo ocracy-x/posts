@@ -7,10 +7,5 @@ export abstract class Repo<T> {
 	abstract create(item: T): Promise<T>;
 	abstract read(id: string): Promise<T | undefined>;
 	abstract update(item: T): Promise<T>;
-	abstract delete(id: string): Promise<undefined>;
-	abstract getAll(): Promise<T[]>;
-}
-
-export interface Serializable<T> {
-	deserialize(input: Object): T;
+	abstract delete(id: string): Promise<boolean>;
 }

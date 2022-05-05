@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { CommunitiesRepo, Community } from './communities.repo';
 import { inject } from 'inversify/lib/annotation/inject';
 import {
@@ -11,6 +11,7 @@ import {
 	httpPost,
 	requestParam,
 	httpDelete,
+	httpPut,
 } from 'inversify-express-utils';
 
 @controller('/v1/communities')
@@ -19,8 +20,19 @@ export class CommunitiesController implements interfaces.Controller {
 		@inject(CommunitiesRepo) private communitiesRepo: CommunitiesRepo,
 	) {}
 
+	@httpPost('/')
+	private async create(@request() req: Request, @response() res: Response) {
+		try {
+			const community = Community.fromJson(req.body);
+			const doc = await this.communitiesRepo.create(community);
+			res.status(201).send(doc);
+		} catch (_) {
+			res.sendStatus(500);
+		}
+	}
+
 	@httpGet('/:id')
-	private async getById(
+	private async read(
 		@requestParam('id') id: string,
 		@response() res: Response,
 	) {
@@ -36,20 +48,13 @@ export class CommunitiesController implements interfaces.Controller {
 		}
 	}
 
-	@httpPost('/')
-	private async create(@request() req: Request, @response() res: Response) {
-		try {
-			const community = Community.fromJson(req.body);
-			const data = await this.communitiesRepo.create(community);
-			console.log(community, data);
-			res.status(201).send(data);
-		} catch (_) {
-			res.sendStatus(500);
-		}
+	@httpPut('/')
+	private async update(@request() req: Request, @response() res: Response) {
+		this.create(req, res);
 	}
 
 	@httpDelete('/:id')
-	private async deleteById(
+	private async delete(
 		@requestParam('id') id: string,
 		@response() res: Response,
 	) {
@@ -57,16 +62,6 @@ export class CommunitiesController implements interfaces.Controller {
 			await this.communitiesRepo.delete(id);
 			res.status(200).send('Resource deleted');
 		} catch {
-			res.sendStatus(500);
-		}
-	}
-
-	@httpGet('/')
-	private async getAll(@request() req: Request, @response() res: Response) {
-		try {
-			const data = await this.communitiesRepo.getAll();
-			res.send(data);
-		} catch (err) {
 			res.sendStatus(500);
 		}
 	}
