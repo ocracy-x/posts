@@ -57,11 +57,6 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		return doc;
 	}
 
-	async update(item: Community): Promise<Community> {
-		await this.store.doc(item.name).set(item, { merge: true });
-		return item;
-	}
-
 	async delete(id: string): Promise<boolean> {
 		const doc = await this.store.doc(id).get();
 		if (doc.exists) {

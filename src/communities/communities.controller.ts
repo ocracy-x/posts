@@ -11,7 +11,6 @@ import {
 	httpPost,
 	requestParam,
 	httpDelete,
-	httpPut,
 } from 'inversify-express-utils';
 
 @controller('/v1/communities')
@@ -24,9 +23,14 @@ export class CommunitiesController implements interfaces.Controller {
 	private async create(@request() req: Request, @response() res: Response) {
 		try {
 			const community = Community.fromJson(req.body);
-			const doc = await this.communitiesRepo.create(community);
-			res.status(201).send(doc);
-		} catch (_) {
+			const prev = await this.communitiesRepo.read(community.name);
+			if (prev) {
+				res.status(400).send('Community already exists');
+			} else {
+				const next = await this.communitiesRepo.create(community);
+				res.status(201).send(next);
+			}
+		} catch (err) {
 			res.sendStatus(500);
 		}
 	}
@@ -46,11 +50,6 @@ export class CommunitiesController implements interfaces.Controller {
 		} catch (_) {
 			res.sendStatus(500);
 		}
-	}
-
-	@httpPut('/')
-	private async update(@request() req: Request, @response() res: Response) {
-		this.create(req, res);
 	}
 
 	@httpDelete('/:id')

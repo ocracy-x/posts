@@ -23,6 +23,7 @@
 ### Systems design
 * [Microservices - Atlassian](https://www.atlassian.com/continuous-delivery/microservices)
 * [What is RDBMS - Oracle](https://www.oracle.com/database/what-is-a-relational-database/)
+* [Indempotence](https://www.restapitutorial.com/lessons/idempotency.html)
 
 
 ### Writing good tests
