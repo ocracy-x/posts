@@ -60,9 +60,9 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 	}
 
 	// no overwrites allowed
-	async create(item: Profile): Promise<Profile> {
+	async create(item: Profile): Promise<Profile | void> {
 		const doc = await this.read(item.username);
-		if (doc) throw 400;
+		if (doc) return;
 		return await this.update(item);
 	}
 	async read(id: string): Promise<Profile | void> {

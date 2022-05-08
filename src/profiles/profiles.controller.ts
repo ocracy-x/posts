@@ -9,6 +9,7 @@ import {
 	requestParam,
 	request,
 	response,
+	httpDelete,
 } from 'inversify-express-utils';
 import 'reflect-metadata';
 import { Profile, ProfilesRepo } from './profiles.repo';
@@ -27,6 +28,23 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
+	@httpPost('/')
+	private async create(
+		@queryParam('username') username: string,
+		@response() res: Response,
+	) {
+		try {
+			const profile = await this.profilesRepo.create(new Profile(username));
+			if (profile) {
+				res.status(201).send(profile);
+			} else {
+				res.status(400).send('Username already exists');
+			}
+		} catch (err) {
+			res.status(500).send();
+		}
+	}
+
 	@httpGet('/:id')
 	private async read(
 		@requestParam('id') id: string,
@@ -40,25 +58,20 @@ export class ProfilesController implements interfaces.Controller {
 				res.send(profile);
 			}
 		} catch (err: any) {
-			res.status(500).send(JSON.stringify(err));
+			res.status(500).send();
 		}
 	}
 
-	@httpPost('/')
-	private async create(
-		@queryParam('username') username: string,
+	@httpDelete('/:id')
+	private async delete(
+		@requestParam('id') id: string,
 		@response() res: Response,
 	) {
 		try {
-			const profile = new Profile(username);
-			await this.profilesRepo.create(profile);
-			res.status(201).send(profile);
+			await this.profilesRepo.delete(id);
+			res.send(200);
 		} catch (err) {
-			if (err == 400) {
-				res.status(400).send('Username already exists');
-			} else {
-				res.status(500).send(err);
-			}
+			res.status(500).send();
 		}
 	}
 }

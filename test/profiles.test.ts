@@ -51,4 +51,16 @@ describe('Profiles', () => {
 				});
 		});
 	});
+
+	describe('DELETE /profile/:id', () => {
+		it('should only have status 200', (done) => {
+			chai
+				.request(app)
+				.delete('/api/v1/profiles/test')
+				.end((_, res) => {
+					res.should.have.status(200);
+					done();
+				});
+		});
+	});
 });
