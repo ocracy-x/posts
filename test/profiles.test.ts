@@ -12,7 +12,7 @@ describe('Profiles', () => {
 			chai
 				.request(app)
 				.get('/api/v1/profiles/all')
-				.end((err, res) => {
+				.end((_, res) => {
 					res.should.have.status(200);
 					const body = res.body;
 					body.should.be.a('array');
@@ -20,6 +20,18 @@ describe('Profiles', () => {
 						profile.should.haveOwnProperty('username');
 						profile.should.haveOwnProperty('joined');
 					});
+					done();
+				});
+		});
+	});
+
+	describe('GET /profile/:id', () => {
+		it('should not throw an interal error', (done) => {
+			chai
+				.request(app)
+				.get('/api/v1/profiles/test')
+				.end((_, res) => {
+					res.should.not.have.status(500);
 					done();
 				});
 		});

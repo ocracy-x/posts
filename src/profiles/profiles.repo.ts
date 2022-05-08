@@ -59,11 +59,17 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return profiles;
 	}
 
-	create(item: Profile): Promise<Profile> {
-		throw new Error('Method not implemented.');
+	// no overwrites allowed
+	async create(item: Profile): Promise<Profile> {
+		const doc = await this.read(item.username);
+		if (doc) throw new Error('User already exists');
+		await this.store.doc(item.username).set(item);
+		return item;
 	}
-	read(id: string): Promise<Profile | undefined> {
-		throw new Error('Method not implemented.');
+	async read(id: string): Promise<Profile | undefined> {
+		const snapshot = await this.store.doc('id').get();
+		const doc = snapshot.data();
+		return doc;
 	}
 	update(item: Profile, patch: boolean): Promise<Profile> {
 		throw new Error('Method not implemented.');
