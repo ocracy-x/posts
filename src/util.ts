@@ -2,9 +2,10 @@ import { injectable } from 'inversify/lib/annotation/injectable';
 import { unmanaged } from 'inversify/lib/annotation/unmanaged';
 
 @injectable()
-export abstract class Repo<T> {
-	constructor(@unmanaged() readonly collection: string) {}
+export abstract class CRUD<T> {
+	constructor(@unmanaged() readonly key: string) {}
 	abstract create(item: T): Promise<T>;
 	abstract read(id: string): Promise<T | undefined>;
+	abstract update(item: T, patch: boolean): Promise<T>;
 	abstract delete(id: string): Promise<boolean>;
 }

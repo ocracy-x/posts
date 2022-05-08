@@ -3,7 +3,7 @@ import {
 	DocumentSnapshot,
 	Firestore,
 } from '@google-cloud/firestore';
-import { Repo } from '../util';
+import { CRUD } from '../util';
 
 export class Community {
 	constructor(readonly name: string, readonly createdAt: Date = new Date()) {}
@@ -24,7 +24,7 @@ export class Community {
 	}
 }
 
-export abstract class CommunitiesRepo extends Repo<Community> {
+export abstract class CommunitiesRepo extends CRUD<Community> {
 	constructor() {
 		super('community');
 	}
@@ -43,7 +43,7 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 	};
 
 	private store = new Firestore()
-		.collection(this.collection)
+		.collection(this.key)
 		.withConverter(this.converter);
 
 	async create(item: Community): Promise<Community> {
@@ -55,6 +55,10 @@ export class CommunitiesFirestore extends CommunitiesRepo {
 		const snapshot = await this.store.doc(id).get();
 		const doc = snapshot.data();
 		return doc;
+	}
+
+	async update(item: Community): Promise<Community> {
+		return await this.create(item);
 	}
 
 	async delete(id: string): Promise<boolean> {
