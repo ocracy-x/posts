@@ -21,6 +21,7 @@
   "homepage": "https://github.com/ocracy-x/posts#readme",
   "dependencies": {
     "@google-cloud/firestore": "^5.0.2",
+    "@google-cloud/storage": "^5.19.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.18.0",
