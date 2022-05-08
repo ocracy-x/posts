@@ -20,8 +20,7 @@ import {
 } from './comments/comments_service';
 
 // load controllers
-import './comments/comments_controller';
-import './communities/communities.controller';
+import './profiles/profiles.controller';
 import { FirestoreProfilesRepo, ProfilesRepo } from './profiles/profiles.repo';
 
 // inject dependencies
