@@ -26,19 +26,19 @@ describe('Profiles', () => {
 	});
 
 	describe('GET /profile/:id', () => {
-		it('should not throw an interal error', (done) => {
+		it('should only have status 200 or 404', (done) => {
 			chai
 				.request(app)
 				.get('/api/v1/profiles/test')
 				.end((_, res) => {
-					res.should.not.have.status(500);
+					res.status.should.be.oneOf([200, 404]);
 					done();
 				});
 		});
 	});
 
 	describe('POST /profile', () => {
-		it('should not throw an internal error', (done) => {
+		it('should only have status 201 or 400', (done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
@@ -46,7 +46,7 @@ describe('Profiles', () => {
 					username: 'test',
 				})
 				.end((_, res) => {
-					res.should.not.have.status(500);
+					res.status.should.be.oneOf([201, 400]);
 					done();
 				});
 		});
