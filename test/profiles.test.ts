@@ -36,4 +36,19 @@ describe('Profiles', () => {
 				});
 		});
 	});
+
+	describe('POST /profile', () => {
+		it('should not throw an internal error', (done) => {
+			chai
+				.request(app)
+				.post('/api/v1/profiles')
+				.query({
+					username: 'test',
+				})
+				.end((_, res) => {
+					res.should.not.have.status(500);
+					done();
+				});
+		});
+	});
 });

@@ -5,7 +5,7 @@ import { unmanaged } from 'inversify/lib/annotation/unmanaged';
 export abstract class CRUD<T> {
 	constructor(@unmanaged() readonly key: string) {}
 	abstract create(item: T): Promise<T>;
-	abstract read(id: string): Promise<T | undefined>;
+	abstract read(id: string): Promise<T | void>;
 	abstract update(item: T, patch: boolean): Promise<T>;
-	abstract delete(id: string): Promise<boolean>;
+	abstract delete(id: string): Promise<void>;
 }

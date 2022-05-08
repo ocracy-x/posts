@@ -62,19 +62,20 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 	// no overwrites allowed
 	async create(item: Profile): Promise<Profile> {
 		const doc = await this.read(item.username);
-		if (doc) throw new Error('User already exists');
-		await this.store.doc(item.username).set(item);
-		return item;
+		if (doc) throw 400;
+		return await this.update(item);
 	}
-	async read(id: string): Promise<Profile | undefined> {
-		const snapshot = await this.store.doc('id').get();
+	async read(id: string): Promise<Profile | void> {
+		const snapshot = await this.store.doc(id).get();
 		const doc = snapshot.data();
 		return doc;
 	}
-	update(item: Profile, patch: boolean): Promise<Profile> {
-		throw new Error('Method not implemented.');
+	async update(item: Profile): Promise<Profile> {
+		await this.store.doc(item.username).set(item, { merge: false });
+		return item;
 	}
-	delete(id: string): Promise<boolean> {
-		throw new Error('Method not implemented.');
+
+	async delete(id: string): Promise<void> {
+		await this.store.doc(id).delete();
 	}
 }

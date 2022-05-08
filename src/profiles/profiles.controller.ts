@@ -5,8 +5,9 @@ import {
 	httpGet,
 	httpPost,
 	interfaces,
-	request,
+	queryParam,
 	requestParam,
+	request,
 	response,
 } from 'inversify-express-utils';
 import 'reflect-metadata';
@@ -27,7 +28,10 @@ export class ProfilesController implements interfaces.Controller {
 	}
 
 	@httpGet('/:id')
-	private async read(@requestParam() id: string, @response() res: Response) {
+	private async read(
+		@requestParam('id') id: string,
+		@response() res: Response,
+	) {
 		try {
 			const profile = await this.profilesRepo.read(id);
 			if (!profile) {
@@ -35,8 +39,26 @@ export class ProfilesController implements interfaces.Controller {
 			} else {
 				res.send(profile);
 			}
+		} catch (err: any) {
+			res.status(500).send(JSON.stringify(err));
+		}
+	}
+
+	@httpPost('/')
+	private async create(
+		@queryParam('username') username: string,
+		@response() res: Response,
+	) {
+		try {
+			const profile = new Profile(username);
+			await this.profilesRepo.create(profile);
+			res.status(201).send(profile);
 		} catch (err) {
-			res.send(500).send(err);
+			if (err == 400) {
+				res.status(400).send('Username already exists');
+			} else {
+				res.status(500).send(err);
+			}
 		}
 	}
 }
