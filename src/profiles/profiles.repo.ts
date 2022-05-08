@@ -19,7 +19,7 @@ export class Profile {
 	}
 
 	static fromJson(json: any): Profile {
-		const username = json.username;
+		const username: string = json.username;
 		const joined = json.joined ? new Date(json.joined) : undefined;
 		return new Profile(username, joined);
 	}
@@ -42,8 +42,9 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		},
 		fromFirestore(snapshot: DocumentSnapshot): Profile {
 			const data = snapshot.data();
-			if (!data)
+			if (!data) {
 				throw Error('Firestore snapshot has no data for Profile: ' + data);
+			}
 			return Profile.fromJson(data);
 		},
 	};
@@ -54,7 +55,7 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 
 	async getAll(): Promise<Profile[]> {
 		const snapshot = await this.store.get();
-		const profiles = snapshot.docs.map((doc) => Profile.fromJson(doc));
+		const profiles = snapshot.docs.map((doc) => Profile.fromJson(doc.data()));
 		return profiles;
 	}
 

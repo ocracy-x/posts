@@ -8,7 +8,7 @@ import {
 	response,
 } from 'inversify-express-utils';
 import 'reflect-metadata';
-import { ProfilesRepo } from './profiles.repo';
+import { Profile, ProfilesRepo } from './profiles.repo';
 
 @controller('/v1/profiles')
 export class ProfilesController implements interfaces.Controller {
