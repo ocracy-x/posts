@@ -8,6 +8,10 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 
 // load repos
 import { FirebaseCommentsRepo } from './comments/comments_repo';
+import {
+	CommunitiesFirestore,
+	CommunitiesRepo,
+} from './communities/communities.repo';
 
 // load services
 import {
@@ -16,12 +20,17 @@ import {
 } from './comments/comments_service';
 
 // load controllers
-import './comments/comments_controller';
+import './profiles/profiles.controller';
+import { FirestoreProfilesRepo, ProfilesRepo } from './profiles/profiles.repo';
 
 // inject dependencies
 const container = new Container();
-container.bind<FirebaseCommentsRepo>(FirebaseCommentsRepo).toSelf();
-container.bind<CommentsService>(CommentsService).to(RedisCommentsService);
+
+// container.bind<FirebaseCommentsRepo>(FirebaseCommentsRepo).toSelf();
+// container.bind<CommunitiesRepo>(CommunitiesRepo).to(CommunitiesFirestore);
+// container.bind<CommentsService>(CommentsService).to(RedisCommentsService);
+
+container.bind<ProfilesRepo>(ProfilesRepo).to(FirestoreProfilesRepo);
 
 // build server
 const server = new InversifyExpressServer(container, null, {

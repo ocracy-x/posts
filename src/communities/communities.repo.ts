@@ -1,0 +1,73 @@
+import {
+	DocumentData,
+	DocumentSnapshot,
+	Firestore,
+} from '@google-cloud/firestore';
+import { CRUD } from '../util';
+
+export class Community {
+	constructor(readonly name: string, readonly createdAt: Date = new Date()) {}
+	toJson(): Object {
+		return {
+			name: this.name,
+			createdAt: this.createdAt.toUTCString(),
+		};
+	}
+
+	static fromJson(json: any): Community {
+		const createdAt = json.createdAt;
+		const doc = new Community(
+			json.name,
+			createdAt ? new Date(createdAt) : undefined,
+		);
+		return doc;
+	}
+}
+
+export abstract class CommunitiesRepo extends CRUD<Community> {
+	constructor() {
+		super('community');
+	}
+}
+
+export class CommunitiesFirestore extends CommunitiesRepo {
+	private converter = {
+		toFirestore(community: Community): DocumentData {
+			return community.toJson();
+		},
+		fromFirestore(snapshot: DocumentSnapshot): Community {
+			const data = snapshot.data();
+			if (!data) throw Error('No data');
+			return Community.fromJson(data);
+		},
+	};
+
+	private store = new Firestore()
+		.collection(this.key)
+		.withConverter(this.converter);
+
+	async create(item: Community): Promise<Community> {
+		await this.store.doc(item.name).set(item, { merge: false });
+		return item;
+	}
+
+	async read(id: string): Promise<Community | undefined> {
+		const snapshot = await this.store.doc(id).get();
+		const doc = snapshot.data();
+		return doc;
+	}
+
+	async update(item: Community): Promise<Community> {
+		return await this.create(item);
+	}
+
+	async delete(id: string): Promise<boolean> {
+		const doc = await this.store.doc(id).get();
+		if (doc.exists) {
+			await this.store.doc(id).delete();
+			return true;
+		} else {
+			return false;
+		}
+	}
+}

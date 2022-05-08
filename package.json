@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "npm test && tsc",
     "dev": "nodemon index.ts",
+    "build": "npm test && tsc",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'"
   },
   "repository": {
@@ -20,10 +20,12 @@
   },
   "homepage": "https://github.com/ocracy-x/posts#readme",
   "dependencies": {
+    "@google-cloud/firestore": "^5.0.2",
+    "@google-cloud/storage": "^5.19.4",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.18.0",
-    "firebase": "^9.6.11",
+    "express-validator": "^6.14.0",
     "helmet": "^5.0.2",
     "inversify": "^6.0.1",
     "inversify-express-utils": "^6.4.3",
@@ -33,9 +35,7 @@
     "@faker-js/faker": "^6.2.0",
     "@types/chai": "^4.3.1",
     "@types/cors": "^2.8.12",
-    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
-    "@types/helmet": "^4.0.0",
     "@types/mocha": "^9.1.1",
     "@types/morgan": "^1.9.3",
     "@types/node": "^17.0.27",
