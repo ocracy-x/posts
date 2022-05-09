@@ -34,14 +34,15 @@ export class ProfilesController implements interfaces.Controller {
 		@response() res: Response,
 	) {
 		try {
-			const profile = await this.profilesRepo.create(new Profile(username));
+			const profile = await this.profilesRepo.create(new Profile({ username }));
 			if (profile) {
 				res.status(201).send(profile);
 			} else {
 				res.status(400).send('Username already exists');
 			}
 		} catch (err) {
-			res.status(500).send();
+			console.log(err);
+			res.status(500).send(JSON.stringify(err));
 		}
 	}
 
