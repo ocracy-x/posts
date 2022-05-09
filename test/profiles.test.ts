@@ -17,6 +17,7 @@ describe('Profiles', () => {
 					const body = res.body;
 					body.should.be.a('array');
 					body.forEach((profile: Profile) => {
+						profile.should.haveOwnProperty('id');
 						profile.should.haveOwnProperty('username');
 						profile.should.haveOwnProperty('joined');
 					});
@@ -25,20 +26,36 @@ describe('Profiles', () => {
 		});
 	});
 
-	describe('GET /profile/:id', () => {
-		it('should only have status 200 or 404', (done) => {
+	describe('DELETE /profile/:id', () => {
+		it('should delete profile with username "test"', (done) => {
 			chai
 				.request(app)
-				.get('/api/v1/profiles/test')
+				.delete('/api/v1/profiles/test')
 				.end((_, res) => {
-					res.status.should.be.oneOf([200, 404]);
+					res.should.have.status(200);
 					done();
 				});
 		});
 	});
 
 	describe('POST /profile', () => {
-		it('should only have status 201 or 400', (done) => {
+		let status: number;
+		let testProfile: Profile;
+		before((done) => {
+			chai
+				.request(app)
+				.post('/api/v1/profiles')
+				.query({
+					username: 'test',
+				})
+				.end((_, res) => {
+					status = res.status;
+					testProfile = Profile.fromJson(res.body);
+					done();
+				});
+		});
+
+		it('should create a profile with username "test"', (done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
@@ -51,7 +68,7 @@ describe('Profiles', () => {
 				});
 		});
 
-		it('should fail to write duplicate usernames', (done) => {
+		it('should fail to create duplicate profile', (done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
@@ -59,31 +76,30 @@ describe('Profiles', () => {
 					username: 'test',
 				})
 				.end((_, res) => {
-					res.should.have.status(400);
+					res.status.should.equal(400);
 					done();
 				});
 		});
 	});
 
-	describe('DELETE /profile/:id', () => {
-		it('should only have status 200', (done) => {
-			chai
-				.request(app)
-				.delete('/api/v1/profiles/test')
-				.end((_, res) => {
-					res.should.have.status(200);
-					done();
-				});
-		});
+	describe('GET /profile/:id', () => {
+		let status: number;
+		let testProfile: Profile;
 
-		it('should not have a profile with username test', (done) => {
+		before((done) => {
 			chai
 				.request(app)
 				.get('/api/v1/profiles/test')
 				.end((_, res) => {
-					res.should.have.status(404);
+					status = res.status;
+					testProfile = Profile.fromJson(res.body);
 					done();
 				});
+		});
+
+		it('should have a profile with username test', (done) => {
+			status.should.equal(200);
+			done();
 		});
 	});
 });

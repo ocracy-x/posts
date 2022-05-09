@@ -12,25 +12,22 @@ export interface ProfileConfig {
 }
 
 export class Profile {
-	private readonly _id?: string;
-	public get id(): string {
-		return this._id ? this._id : 'no-key';
-	}
+	public readonly id?: string;
+
 	public get hasId(): boolean {
-		return !!this._id;
+		return !!this.id;
 	}
 
 	public readonly username: string;
 	public readonly joined: Date;
 	constructor(config: ProfileConfig) {
-		this._id = config.id;
+		this.id = config.id;
 		this.username = config.username;
 		this.joined = config.joined ? config.joined : new Date();
 	}
 
 	toJson(): Object {
 		return {
-			id: this.id,
 			username: this.username,
 			joined: this.joined.toUTCString(),
 		};
@@ -61,10 +58,12 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		},
 		fromFirestore(snapshot: DocumentSnapshot): Profile {
 			const data = snapshot.data();
+			const id = snapshot.id;
+			const json = { id, ...data };
 			if (!data) {
 				throw Error('Firestore snapshot has no data for Profile: ' + data);
 			}
-			return Profile.fromJson(data);
+			return Profile.fromJson(json);
 		},
 	};
 
