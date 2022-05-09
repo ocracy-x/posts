@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { query, Request, Response } from 'express';
 import { inject } from 'inversify';
 import {
 	controller,
@@ -10,9 +10,16 @@ import {
 	request,
 	response,
 	httpDelete,
+	httpPut,
+	httpPatch,
 } from 'inversify-express-utils';
 import 'reflect-metadata';
-import { Profile, ProfilesRepo } from './profiles.repo';
+import {
+	Profile,
+	ProfileConfig,
+	ProfileFields,
+	ProfilesRepo,
+} from './profiles.repo';
 
 @controller('/v1/profiles')
 export class ProfilesController implements interfaces.Controller {
@@ -63,13 +70,28 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
-	@httpDelete('/:id')
+	@httpPatch('/:prevUsername')
+	private async patch(
+		@requestParam('prevUsername') prevUsername: string,
+		@queryParam('username') username: string,
+		@response() res: Response,
+	) {
+		const fields: ProfileFields = { username };
+		const doc = await this.profilesRepo.patch(prevUsername, fields);
+		if (!doc) {
+			res.status(404).send();
+		} else {
+			res.status(201).send(doc);
+		}
+	}
+
+	@httpDelete('/:username')
 	private async delete(
-		@requestParam('id') id: string,
+		@requestParam('username') username: string,
 		@response() res: Response,
 	) {
 		try {
-			const deleted = await this.profilesRepo.delete(id);
+			const deleted = await this.profilesRepo.delete(username);
 			if (deleted) {
 				res.send(204);
 			} else {

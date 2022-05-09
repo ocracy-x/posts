@@ -6,10 +6,14 @@ import {
 } from '@google-cloud/firestore';
 import { CRUD } from '../util';
 
-export interface ProfileConfig {
+export interface ProfileFields {
 	readonly id?: string;
-	readonly username: string;
+	readonly username?: string;
 	readonly joined?: Date;
+}
+
+export interface ProfileConfig extends ProfileFields {
+	readonly username: string;
 }
 
 export class Profile {
@@ -42,7 +46,7 @@ export class Profile {
 	}
 }
 
-export abstract class ProfilesRepo extends CRUD<Profile> {
+export abstract class ProfilesRepo extends CRUD<Profile, ProfileFields> {
 	constructor() {
 		super('profiles');
 	}
@@ -91,23 +95,31 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return docs[0].ref;
 	}
 
-	// no overwrites allowed
-	async create(item: Profile): Promise<Profile | void> {
-		const exists = await this.read(item.username);
-		if (exists) return;
-		const ref = await this.profiles.add(item);
+	async create(profile: Profile): Promise<Profile | void> {
+		const prevDoc = await this.read(profile.username);
+		if (prevDoc) return;
+		const ref = await this.profiles.add(profile);
 		const doc = await ref.get();
-		return doc.data();
+		const data = doc.data();
+		return data;
 	}
+
 	async read(username: string): Promise<Profile | void> {
 		const ref = await this.getRef(username);
 		if (!ref) return;
 		const doc = await ref.get();
 		return doc.data();
 	}
-	async update(item: Profile): Promise<Profile> {
-		await this.profiles.doc(item.username).set(item, { merge: false });
-		return item;
+
+	async patch(
+		prevUsername: string,
+		config: ProfileFields,
+	): Promise<Profile | void> {
+		const ref = await this.getRef(prevUsername);
+		if (!ref) return;
+		await ref.update(config);
+		const doc = await ref.get();
+		return doc.data();
 	}
 
 	async delete(username: string): Promise<boolean> {

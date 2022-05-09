@@ -1,4 +1,4 @@
-import chai, { should } from 'chai';
+import chai, { expect, should } from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../src/app';
 import { Profile } from '../src/profiles/profiles.repo';
@@ -26,13 +26,13 @@ describe('Profiles', () => {
 		});
 	});
 
-	describe('DELETE /profile/:id', () => {
+	describe('DELETE /profile/:username', () => {
 		it('should delete profile with username "test"', (done) => {
 			chai
 				.request(app)
 				.delete('/api/v1/profiles/test')
 				.end((_, res) => {
-					res.status.should.be.oneOf([204, 400]);
+					res.status.should.be.oneOf([204, 404]);
 					done();
 				});
 		});
@@ -82,24 +82,42 @@ describe('Profiles', () => {
 		});
 	});
 
-	describe('GET /profile/:id', () => {
-		let status: number;
-		let testProfile: Profile;
-
-		before((done) => {
+	describe('GET /profile/:username', () => {
+		it('should have a profile with username test', (done) => {
 			chai
 				.request(app)
 				.get('/api/v1/profiles/test')
 				.end((_, res) => {
-					status = res.status;
-					testProfile = Profile.fromJson(res.body);
+					res.should.have.status(200);
+					done();
+				});
+		});
+	});
+
+	describe('PATCH /profile/:prevUsername', () => {
+		const other = 'not_test';
+		it('should change username', (done) => {
+			chai
+				.request(app)
+				.patch('/api/v1/profiles/test')
+				.query({
+					username: other,
+				})
+				.end((_, res) => {
+					const profile = Profile.fromJson(res.body);
+					expect(profile.username).to.equal(other);
 					done();
 				});
 		});
 
-		it('should have a profile with username test', (done) => {
-			status.should.equal(200);
-			done();
+		it('should not have a profile with username test', (done) => {
+			chai
+				.request(app)
+				.get('/api/v1/profiles/test')
+				.end((_, res) => {
+					res.should.have.status(404);
+					done();
+				});
 		});
 	});
 });
