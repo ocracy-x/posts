@@ -7,5 +7,5 @@ export abstract class CRUD<T> {
 	abstract create(item: T): Promise<T | void>;
 	abstract read(id: string): Promise<T | void>;
 	abstract update(item: T, patch: boolean): Promise<T>;
-	abstract delete(id: string): Promise<void>;
+	abstract delete(id: string): Promise<boolean>;
 }

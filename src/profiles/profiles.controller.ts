@@ -69,8 +69,12 @@ export class ProfilesController implements interfaces.Controller {
 		@response() res: Response,
 	) {
 		try {
-			await this.profilesRepo.delete(id);
-			res.send(200);
+			const deleted = await this.profilesRepo.delete(id);
+			if (deleted) {
+				res.send(204);
+			} else {
+				res.send(404);
+			}
 		} catch (err) {
 			res.status(500).send();
 		}

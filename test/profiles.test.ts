@@ -32,7 +32,7 @@ describe('Profiles', () => {
 				.request(app)
 				.delete('/api/v1/profiles/test')
 				.end((_, res) => {
-					res.should.have.status(200);
+					res.status.should.be.oneOf([204, 400]);
 					done();
 				});
 		});

@@ -100,7 +100,15 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return item;
 	}
 
-	async delete(id: string): Promise<void> {
-		await this.profiles.doc(id).delete();
+	async delete(username: string): Promise<boolean> {
+		const ref = await this.profiles
+			.where('username', '==', username)
+			.limit(1)
+			.get();
+		const docs = ref.docs;
+		if (!docs.length) return false;
+		const doc = docs[0];
+		await doc.ref.delete();
+		return true;
 	}
 }
