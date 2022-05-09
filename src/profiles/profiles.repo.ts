@@ -1,5 +1,6 @@
 import {
 	DocumentData,
+	DocumentReference,
 	DocumentSnapshot,
 	Firestore,
 } from '@google-cloud/firestore';
@@ -78,6 +79,18 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return profiles;
 	}
 
+	private async getRef(
+		username: string,
+	): Promise<DocumentReference<Profile> | void> {
+		const ref = await this.profiles
+			.where('username', '==', username)
+			.limit(1)
+			.get();
+		const docs = ref.docs;
+		if (!docs.length) return;
+		return docs[0].ref;
+	}
+
 	// no overwrites allowed
 	async create(item: Profile): Promise<Profile | void> {
 		const exists = await this.read(item.username);
@@ -87,13 +100,10 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return doc.data();
 	}
 	async read(username: string): Promise<Profile | void> {
-		const snapshot = await this.profiles
-			.where('username', '==', username)
-			.limit(1)
-			.get();
-		const list = snapshot.docs.map((doc) => doc.data());
-		if (!list.length) return;
-		return list[0];
+		const ref = await this.getRef(username);
+		if (!ref) return;
+		const doc = await ref.get();
+		return doc.data();
 	}
 	async update(item: Profile): Promise<Profile> {
 		await this.profiles.doc(item.username).set(item, { merge: false });
@@ -101,14 +111,9 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 	}
 
 	async delete(username: string): Promise<boolean> {
-		const ref = await this.profiles
-			.where('username', '==', username)
-			.limit(1)
-			.get();
-		const docs = ref.docs;
-		if (!docs.length) return false;
-		const doc = docs[0];
-		await doc.ref.delete();
+		const ref = await this.getRef(username);
+		if (!ref) return false;
+		await ref.delete();
 		return true;
 	}
 }
