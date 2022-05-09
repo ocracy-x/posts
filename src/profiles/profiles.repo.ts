@@ -49,12 +49,14 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		},
 	};
 
-	private store = new Firestore()
+	private store = new Firestore();
+
+	private communities = this.store
 		.collection(this.key)
 		.withConverter(this.converter);
 
 	async getAll(): Promise<Profile[]> {
-		const snapshot = await this.store.get();
+		const snapshot = await this.communities.get();
 		const profiles = snapshot.docs.map((doc) => Profile.fromJson(doc.data()));
 		return profiles;
 	}
@@ -65,17 +67,21 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		if (doc) return;
 		return await this.update(item);
 	}
-	async read(id: string): Promise<Profile | void> {
-		const snapshot = await this.store.doc(id).get();
-		const doc = snapshot.data();
-		return doc;
+	async read(username: string): Promise<Profile | void> {
+		const snapshot = await this.communities
+			.where('username', '==', username)
+			.limit(1)
+			.get();
+		const list = snapshot.docs.map((doc) => doc.data());
+		if (!list.length) return;
+		return list[0];
 	}
 	async update(item: Profile): Promise<Profile> {
-		await this.store.doc(item.username).set(item, { merge: false });
+		await this.communities.doc(item.username).set(item, { merge: false });
 		return item;
 	}
 
 	async delete(id: string): Promise<void> {
-		await this.store.doc(id).delete();
+		await this.communities.doc(id).delete();
 	}
 }
