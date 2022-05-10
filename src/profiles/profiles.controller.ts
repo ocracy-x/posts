@@ -125,8 +125,8 @@ export class ProfilesController implements interfaces.Controller {
 			res.status(422).send({ errors: errors.array() });
 		} else {
 			try {
-				await this.profilesRepo.patch(prevUsername, fields);
-				res.status(200).send();
+				const doc = await this.profilesRepo.patch(prevUsername, fields);
+				res.status(200).send(doc);
 			} catch (err) {
 				if (err == 400) {
 					res.status(400).send('Username already taken');

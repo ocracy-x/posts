@@ -3,6 +3,7 @@ import {
 	DocumentReference,
 	DocumentSnapshot,
 	Firestore,
+	Transaction,
 } from '@google-cloud/firestore';
 import { CRUD } from '../util';
 
@@ -93,13 +94,29 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return docs[0].ref;
 	}
 
+	async getRefInTransaction(
+		username: string,
+		t: Transaction,
+	): Promise<DocumentReference<Profile> | void> {
+		const snapshots = await t.get(
+			this.profiles.where('username', '==', username).limit(1),
+		);
+		const docs = snapshots.docs;
+		if (docs.length) {
+			return docs[0].ref;
+		}
+	}
+
 	async create(profile: Profile): Promise<Profile | void> {
-		const prevDoc = await this.read(profile.username);
-		if (prevDoc) return;
-		const ref = await this.profiles.add(profile);
-		const doc = await ref.get();
-		const data = doc.data();
-		return data;
+		const createdRef = await this.store.runTransaction(async (t) => {
+			const duplicate = await this.getRefInTransaction(profile.username, t);
+			if (duplicate) return;
+			const ref = this.profiles.doc();
+			await t.create(ref, profile);
+			return ref;
+		});
+		const createdDoc = await createdRef?.get();
+		return createdDoc?.data();
 	}
 
 	async read(username: string): Promise<Profile | void> {
@@ -109,30 +126,29 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return doc.data();
 	}
 
-	async patch(prevUsername: string, fields: ProfileFields): Promise<void> {
-		await this.store.runTransaction(async (t) => {
+	async patch(
+		prevUsername: string,
+		fields: ProfileFields,
+	): Promise<Profile | void> {
+		const patchedRef = await this.store.runTransaction(async (t) => {
 			// reads:
 			// verify user with prevUsername exists
-			const snapshots = await t.get(
-				this.profiles.where('username', '==', prevUsername),
-			);
-			const prevDocs = snapshots.docs;
-			if (!prevDocs.length) throw 404;
-			const prevSnapshot = prevDocs[0];
+			const ref = await this.getRefInTransaction(prevUsername, t);
+			if (!ref) throw 404;
 
 			// verify that the proposed alternate username is available
 			if (fields.username) {
-				const matchingSnapshots = await t.get(
-					this.profiles.where('username', '==', fields.username).limit(1),
-				);
-				const matchingDocs = matchingSnapshots.docs;
-				if (matchingDocs.length) throw 400;
+				const duplicate = await this.getRefInTransaction(fields.username, t);
+				if (duplicate) throw 400;
 			}
 
 			// writes:
 			// update document with new fields
-			await t.update(prevSnapshot.ref, fields);
+			await t.update(ref, fields);
+			return ref;
 		});
+		const patchedDoc = await patchedRef.get();
+		return patchedDoc.data();
 	}
 
 	async delete(username: string): Promise<boolean> {

@@ -31,21 +31,15 @@ describe('Profiles', () => {
 	});
 
 	describe('POST /profile', () => {
-		let status: number;
-		before((done) => {
+		it('should create a profile with username "test"', (done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
 				.send({ username: test })
 				.end((_, res) => {
-					status = res.status;
+					res.status.should.be.oneOf([201, 400]);
 					done();
 				});
-		});
-
-		it('should create a profile with username "test"', (done) => {
-			expect(status).to.be.oneOf([201, 400]);
-			done();
 		});
 
 		it('should fail to create duplicate profile', (done) => {
@@ -103,6 +97,10 @@ describe('Profiles', () => {
 				.send({ joined: time })
 				.end((_, res) => {
 					res.should.have.status(200);
+					const doc = Profile.fromJson(res.body);
+					const target = new Date(time).toUTCString();
+					const actual = doc.joined.toUTCString();
+					expect(actual).to.equal(target);
 					done();
 				});
 		});
@@ -114,6 +112,8 @@ describe('Profiles', () => {
 				.send({ username: other })
 				.end((_, res) => {
 					res.should.have.status(200);
+					const doc = Profile.fromJson(res.body);
+					expect(doc.username).to.equal(other);
 					done();
 				});
 		});
