@@ -1,18 +1,18 @@
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
 import {
 	controller,
 	httpGet,
 	httpPost,
 	interfaces,
-	queryParam,
 	requestParam,
 	response,
 	httpDelete,
 	httpPatch,
 	request,
 	requestBody,
+	Middleware,
 } from 'inversify-express-utils';
 import {
 	Profile,
@@ -31,13 +31,34 @@ function ProfileValidator(usernameOptional: boolean = false) {
 	return checkSchema({
 		username: {
 			optional: usernameOptional ? true : undefined,
-			in: ['body'],
+			in: 'body',
 			errorMessage: 'Username is invalid',
 			custom: {
 				options: (username) => usernameRegex.test(username),
 			},
 		},
+		joined: {
+			optional: true,
+			in: 'body',
+			custom: {
+				options: (joined) => {
+					const epoch = Date.parse(joined);
+					return !Number.isNaN(epoch);
+				},
+			},
+		},
 	});
+}
+
+function handleValidationMiddleware(optional: boolean): Middleware {
+	return (req: Request, res: Response, next: NextFunction) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.status(422).json({ errors: errors.array() });
+		} else {
+			next();
+		}
+	};
 }
 
 @controller('/v1/profiles')
@@ -96,18 +117,23 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
-	@httpPatch('/:prevUsername')
+	@httpPatch('/:prevUsername', ...ProfileValidator(true))
 	private async patch(
 		@requestParam('prevUsername') prevUsername: string,
-		@queryParam('username') username: string,
+		@request() req: Request,
+		@requestBody() fields: ProfileFields,
 		@response() res: Response,
 	) {
-		const fields: ProfileFields = { username };
-		const doc = await this.profilesRepo.patch(prevUsername, fields);
-		if (!doc) {
-			res.status(404).send();
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.status(422).send({ errors: errors.array() });
 		} else {
-			res.status(201).send(doc);
+			const doc = await this.profilesRepo.patch(prevUsername, fields);
+			if (!doc) {
+				res.status(404).send();
+			} else {
+				res.status(200).send(doc);
+			}
 		}
 	}
 

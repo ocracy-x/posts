@@ -44,7 +44,7 @@ describe('Profiles', () => {
 		});
 
 		it('should create a profile with username "test"', (done) => {
-			expect(status).to.be.oneOf([201]);
+			expect(status).to.be.oneOf([201, 400]);
 			done();
 		});
 
@@ -88,11 +88,10 @@ describe('Profiles', () => {
 			chai
 				.request(app)
 				.patch('/api/v1/profiles/test')
-				.query({
-					username: other,
-				})
+				.send({ username: other })
 				.end((_, res) => {
 					const profile = Profile.fromJson(res.body);
+					res.should.have.status(200);
 					expect(profile.username).to.equal(other);
 					done();
 				});
