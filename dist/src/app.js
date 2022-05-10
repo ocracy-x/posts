@@ -11,18 +11,12 @@ var morgan_1 = __importDefault(require("morgan"));
 var inversify_1 = require("inversify");
 var inversify_express_utils_1 = require("inversify-express-utils");
 // load repos
-var comments_repo_1 = require("./comments/comments_repo");
-var communities_repo_1 = require("./communities/communities.repo");
-// load services
-var comments_service_1 = require("./comments/comments_service");
-// load controllers
-require("./comments/comments_controller");
-require("./communities/communities.controller");
+var profiles_repo_1 = require("./profiles/profiles.repo");
 // inject dependencies
 var container = new inversify_1.Container();
-container.bind(comments_repo_1.FirebaseCommentsRepo).toSelf();
-container.bind(communities_repo_1.CommunitiesRepo).to(communities_repo_1.CommunitiesFirestore);
-container.bind(comments_service_1.CommentsService).to(comments_service_1.RedisCommentsService);
+container.bind(profiles_repo_1.ProfilesRepo).to(profiles_repo_1.FirestoreProfilesRepo);
+// load controllers
+require("./profiles/profiles.controller");
 // build server
 var server = new inversify_express_utils_1.InversifyExpressServer(container, null, {
     rootPath: '/api',
@@ -34,6 +28,6 @@ server.setConfig(function (app) {
     app.use((0, helmet_1.default)());
     app.use((0, morgan_1.default)('tiny'));
 });
-// export server
+// build server
 var app = server.build();
 exports.default = app;

@@ -1,18 +1,61 @@
 import 'reflect-metadata';
-import { Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { inject } from 'inversify';
 import {
 	controller,
 	httpGet,
 	httpPost,
 	interfaces,
-	queryParam,
 	requestParam,
 	response,
 	httpDelete,
 	httpPatch,
+	request,
+	requestBody,
+	Middleware,
 } from 'inversify-express-utils';
-import { Profile, ProfileFields, ProfilesRepo } from './profiles.repo';
+import {
+	Profile,
+	ProfileConfig,
+	ProfileFields,
+	ProfilesRepo,
+} from './profiles.repo';
+import { checkSchema, validationResult } from 'express-validator';
+
+// regex to check username: https://stackoverflow.com/questions/12018245/regular-expression-to-validate-username
+const usernameRegex = new RegExp(
+	'^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$',
+);
+
+function ProfileValidator(usernameOptional: boolean = false) {
+	return checkSchema({
+		username: {
+			optional: usernameOptional ? true : undefined,
+			in: 'body',
+			errorMessage: 'Username is invalid',
+			custom: {
+				options: (username) => usernameRegex.test(username),
+			},
+		},
+		joined: {
+			optional: true,
+			in: 'body',
+			errorMessage: 'Joined should be a timestamp since epoch in ms',
+			isNumeric: true,
+		},
+	});
+}
+
+function handleValidationMiddleware(optional: boolean): Middleware {
+	return (req: Request, res: Response, next: NextFunction) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.status(422).json({ errors: errors.array() });
+		} else {
+			next();
+		}
+	};
+}
 
 @controller('/v1/profiles')
 export class ProfilesController implements interfaces.Controller {
@@ -29,20 +72,27 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
-	@httpPost('/')
+	@httpPost('/', ...ProfileValidator())
 	private async create(
-		@queryParam('username') username: string,
+		@request() req: Request,
 		@response() res: Response,
+		@requestBody() config: ProfileConfig,
 	) {
-		try {
-			const profile = await this.profilesRepo.create(new Profile({ username }));
-			if (profile) {
-				res.status(201).send(profile);
-			} else {
-				res.status(400).send('Username already exists');
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.status(422).json({ errors: errors.array() });
+		} else {
+			try {
+				const profile = Profile.fromJson(config);
+				const doc = await this.profilesRepo.create(profile);
+				if (doc) {
+					res.status(201).send(doc);
+				} else {
+					res.status(400).send('Username already exists');
+				}
+			} catch (err) {
+				res.status(500).send(JSON.stringify(err));
 			}
-		} catch (err) {
-			res.status(500).send();
 		}
 	}
 
@@ -63,18 +113,27 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
-	@httpPatch('/:prevUsername')
+	@httpPatch('/:prevUsername', ...ProfileValidator(true))
 	private async patch(
 		@requestParam('prevUsername') prevUsername: string,
-		@queryParam('username') username: string,
+		@request() req: Request,
+		@requestBody() fields: ProfileFields,
 		@response() res: Response,
 	) {
-		const fields: ProfileFields = { username };
-		const doc = await this.profilesRepo.patch(prevUsername, fields);
-		if (!doc) {
-			res.status(404).send();
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) {
+			res.status(422).send({ errors: errors.array() });
 		} else {
-			res.status(201).send(doc);
+			try {
+				const doc = await this.profilesRepo.patch(prevUsername, fields);
+				if (!doc) {
+					res.status(404).send();
+				} else {
+					res.status(200).send(doc);
+				}
+			} catch (err) {
+				res.status(500).send(JSON.stringify(err));
+			}
 		}
 	}
 
@@ -86,9 +145,9 @@ export class ProfilesController implements interfaces.Controller {
 		try {
 			const deleted = await this.profilesRepo.delete(username);
 			if (deleted) {
-				res.send(204);
+				res.status(204).send();
 			} else {
-				res.send(404);
+				res.status(404).send();
 			}
 		} catch (err) {
 			res.status(500).send();

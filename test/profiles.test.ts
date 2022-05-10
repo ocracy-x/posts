@@ -7,6 +7,10 @@ chai.use(chaiHttp);
 should();
 
 describe('Profiles', () => {
+	const test = 'test';
+	const other = 'other';
+	const invalid = 'aawef.__l-.fa///';
+
 	describe('GET /profiles/all', () => {
 		it('should get an array of profiles', (done) => {
 			chai
@@ -26,57 +30,42 @@ describe('Profiles', () => {
 		});
 	});
 
-	describe('DELETE /profile/:username', () => {
-		it('should delete profile with username "test"', (done) => {
-			chai
-				.request(app)
-				.delete('/api/v1/profiles/test')
-				.end((_, res) => {
-					res.status.should.be.oneOf([204, 404]);
-					done();
-				});
-		});
-	});
-
 	describe('POST /profile', () => {
 		let status: number;
-		let testProfile: Profile;
 		before((done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
-				.query({
-					username: 'test',
-				})
+				.send({ username: test })
 				.end((_, res) => {
 					status = res.status;
-					testProfile = Profile.fromJson(res.body);
 					done();
 				});
 		});
 
 		it('should create a profile with username "test"', (done) => {
-			chai
-				.request(app)
-				.post('/api/v1/profiles')
-				.query({
-					username: 'test',
-				})
-				.end((_, res) => {
-					res.status.should.be.oneOf([201, 400]);
-					done();
-				});
+			expect(status).to.be.oneOf([201, 400]);
+			done();
 		});
 
 		it('should fail to create duplicate profile', (done) => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
-				.query({
-					username: 'test',
-				})
+				.send({ username: test })
 				.end((_, res) => {
 					res.status.should.equal(400);
+					done();
+				});
+		});
+
+		it('should validate usernames', (done) => {
+			chai
+				.request(app)
+				.post('/api/v1/profiles')
+				.send({ username: invalid })
+				.end((_, res) => {
+					res.status.should.equal(422);
 					done();
 				});
 		});
@@ -86,7 +75,7 @@ describe('Profiles', () => {
 		it('should have a profile with username test', (done) => {
 			chai
 				.request(app)
-				.get('/api/v1/profiles/test')
+				.get(`/api/v1/profiles/${test}`)
 				.end((_, res) => {
 					res.should.have.status(200);
 					done();
@@ -95,16 +84,42 @@ describe('Profiles', () => {
 	});
 
 	describe('PATCH /profile/:prevUsername', () => {
-		const other = 'not_test';
+		it('should validate timestamp', (done) => {
+			chai
+				.request(app)
+				.patch('/api/v1/profiles/test')
+				.send({ joined: 'not a timestamp' })
+				.end((_, res) => {
+					res.should.have.status(422);
+					done();
+				});
+		});
+
+		it('should change timestamp', (done) => {
+			const time = 1;
+			chai
+				.request(app)
+				.patch('/api/v1/profiles/test')
+				.send({ joined: time })
+				.end((_, res) => {
+					const profile = Profile.fromJson(res.body);
+					res.should.have.status(200);
+					res.body.should.haveOwnProperty('joined');
+					const actual = profile.joined.toUTCString();
+					const target = new Date(time).toUTCString();
+					expect(actual).to.equal(target);
+					done();
+				});
+		});
+
 		it('should change username', (done) => {
 			chai
 				.request(app)
 				.patch('/api/v1/profiles/test')
-				.query({
-					username: other,
-				})
+				.send({ username: other })
 				.end((_, res) => {
 					const profile = Profile.fromJson(res.body);
+					res.should.have.status(200);
 					expect(profile.username).to.equal(other);
 					done();
 				});
@@ -113,11 +128,23 @@ describe('Profiles', () => {
 		it('should not have a profile with username test', (done) => {
 			chai
 				.request(app)
-				.get('/api/v1/profiles/test')
+				.get(`/api/v1/profiles/${test}`)
 				.end((_, res) => {
 					res.should.have.status(404);
 					done();
 				});
+		});
+
+		describe('DELETE /profile/:username', () => {
+			it('should delete profile with username "other"', (done) => {
+				chai
+					.request(app)
+					.delete(`/api/v1/profiles/${other}`)
+					.end((_, res) => {
+						res.status.should.equal(204);
+						done();
+					});
+			});
 		});
 	});
 });
