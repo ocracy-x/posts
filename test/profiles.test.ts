@@ -35,9 +35,7 @@ describe('Profiles', () => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
-				.query({
-					username: test,
-				})
+				.send({ username: test })
 				.end((_, res) => {
 					status = res.status;
 					done();
@@ -45,7 +43,7 @@ describe('Profiles', () => {
 		});
 
 		it('should create a profile with username "test"', (done) => {
-			expect(status).to.be.oneOf([201, 400]);
+			expect(status).to.be.oneOf([201]);
 			done();
 		});
 
@@ -53,9 +51,7 @@ describe('Profiles', () => {
 			chai
 				.request(app)
 				.post('/api/v1/profiles')
-				.query({
-					username: test,
-				})
+				.send({ username: test })
 				.end((_, res) => {
 					res.status.should.equal(400);
 					done();
@@ -76,7 +72,6 @@ describe('Profiles', () => {
 	});
 
 	describe('PATCH /profile/:prevUsername', () => {
-		const other = 'not_test';
 		it('should change username', (done) => {
 			chai
 				.request(app)
