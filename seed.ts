@@ -3,7 +3,7 @@ import axios from 'axios';
 import cliProgress from 'cli-progress';
 
 async function seed() {
-	const max = 900;
+	const max = 10;
 	const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 	bar.start(max, 0);
 	for (let i = 1; i <= max; i++) {
