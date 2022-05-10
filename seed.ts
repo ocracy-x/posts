@@ -9,9 +9,9 @@ async function seed() {
 	for (let i = 1; i <= max; i++) {
 		try {
 			const username = faker.internet.userName();
-			await axios.post(
-				`http://localhost:3000/api/v1/profiles?username=${username}`,
-			);
+			await axios.post(`http://localhost:3000/api/v1/profiles`, {
+				username,
+			});
 		} catch (_) {}
 		bar.update(i);
 	}
