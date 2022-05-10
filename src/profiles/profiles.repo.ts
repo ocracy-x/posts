@@ -16,15 +16,15 @@ export interface ProfileConfig extends ProfileFields {
 	readonly username: string;
 }
 
-export class Profile {
+export class Profile implements ProfileConfig {
 	public readonly id?: string;
+	public readonly username: string;
+	public readonly joined: Date;
 
 	public get hasId(): boolean {
 		return !!this.id;
 	}
 
-	public readonly username: string;
-	public readonly joined: Date;
 	constructor(config: ProfileConfig) {
 		this.id = config.id;
 		this.username = config.username;
@@ -50,7 +50,6 @@ export abstract class ProfilesRepo extends CRUD<Profile, ProfileFields> {
 	constructor() {
 		super('profiles');
 	}
-
 	abstract getAll(): Promise<Profile[]>;
 }
 

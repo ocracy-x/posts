@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Response } from 'express';
 import { inject } from 'inversify';
 import {
@@ -11,7 +12,6 @@ import {
 	httpDelete,
 	httpPatch,
 } from 'inversify-express-utils';
-import 'reflect-metadata';
 import { Profile, ProfileFields, ProfilesRepo } from './profiles.repo';
 
 @controller('/v1/profiles')
