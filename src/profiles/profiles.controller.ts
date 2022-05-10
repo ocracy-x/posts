@@ -1,4 +1,4 @@
-import { query, Request, Response } from 'express';
+import { Response } from 'express';
 import { inject } from 'inversify';
 import {
 	controller,
@@ -7,24 +7,18 @@ import {
 	interfaces,
 	queryParam,
 	requestParam,
-	request,
 	response,
 	httpDelete,
-	httpPut,
 	httpPatch,
 } from 'inversify-express-utils';
 import 'reflect-metadata';
-import {
-	Profile,
-	ProfileConfig,
-	ProfileFields,
-	ProfilesRepo,
-} from './profiles.repo';
+import { Profile, ProfileFields, ProfilesRepo } from './profiles.repo';
 
 @controller('/v1/profiles')
 export class ProfilesController implements interfaces.Controller {
 	constructor(@inject(ProfilesRepo) private profilesRepo: ProfilesRepo) {}
 
+	/// TODO: needs to be paginated
 	@httpGet('/all')
 	private async getAll(@response() res: Response) {
 		try {
@@ -48,18 +42,17 @@ export class ProfilesController implements interfaces.Controller {
 				res.status(400).send('Username already exists');
 			}
 		} catch (err) {
-			console.log(err);
-			res.status(500).send(JSON.stringify(err));
+			res.status(500).send();
 		}
 	}
 
-	@httpGet('/:id')
+	@httpGet('/:username')
 	private async read(
-		@requestParam('id') id: string,
+		@requestParam('username') username: string,
 		@response() res: Response,
 	) {
 		try {
-			const profile = await this.profilesRepo.read(id);
+			const profile = await this.profilesRepo.read(username);
 			if (!profile) {
 				res.sendStatus(404);
 			} else {
