@@ -78,6 +78,7 @@ export class ProfilesController implements interfaces.Controller {
 		@response() res: Response,
 		@requestBody() config: ProfileConfig,
 	) {
+		/// TODO: move validation error handling to middleware
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			res.status(422).json({ errors: errors.array() });
