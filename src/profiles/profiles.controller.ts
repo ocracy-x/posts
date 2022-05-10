@@ -57,7 +57,7 @@ function handleValidationMiddleware(optional: boolean): Middleware {
 	};
 }
 
-@controller('/v1/profiles')
+@controller('/profiles')
 export class ProfilesController implements interfaces.Controller {
 	constructor(@inject(ProfilesRepo) private profilesRepo: ProfilesRepo) {}
 

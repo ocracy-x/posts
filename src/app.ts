@@ -18,7 +18,7 @@ import './profiles/profiles.controller';
 
 // build server
 const server = new InversifyExpressServer(container, null, {
-	rootPath: '/api/v1/',
+	rootPath: '/api/v1',
 });
 
 // inject middleware
