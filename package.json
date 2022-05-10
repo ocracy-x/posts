@@ -8,7 +8,8 @@
     "dev": "nodemon index.ts",
     "build": "npm test && tsc",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
-    "seed": "node dist/seed.js"
+    "seed": "node dist/seed.js",
+    "firestore": "ts-node confirm_firestore.ts"
   },
   "repository": {
     "type": "git",
