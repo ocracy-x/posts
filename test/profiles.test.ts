@@ -9,6 +9,7 @@ should();
 describe('Profiles', () => {
 	const test = 'test';
 	const other = 'other';
+	const invalid = 'aawef.__l-.fa///';
 
 	describe('GET /profiles/all', () => {
 		it('should get an array of profiles', (done) => {
@@ -54,6 +55,17 @@ describe('Profiles', () => {
 				.send({ username: test })
 				.end((_, res) => {
 					res.status.should.equal(400);
+					done();
+				});
+		});
+
+		it('should validate usernames', (done) => {
+			chai
+				.request(app)
+				.post('/api/v1/profiles')
+				.send({ username: invalid })
+				.end((_, res) => {
+					res.status.should.equal(422);
 					done();
 				});
 		});

@@ -20,19 +20,22 @@ import {
 	ProfileFields,
 	ProfilesRepo,
 } from './profiles.repo';
-import { body, checkSchema, validationResult } from 'express-validator';
+import { checkSchema, validationResult } from 'express-validator';
 
 // regex to check username: https://stackoverflow.com/questions/12018245/regular-expression-to-validate-username
 const usernameRegex = new RegExp(
-	'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$',
+	'^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$',
 );
 
-class ProfileValidator {
-	static config = checkSchema({
+function ProfileValidator(usernameOptional: boolean = false) {
+	return checkSchema({
 		username: {
+			optional: usernameOptional ? true : undefined,
 			in: ['body'],
-			errorMessage: 'Must have username',
-			isString: true,
+			errorMessage: 'Username is invalid',
+			custom: {
+				options: (username) => usernameRegex.test(username),
+			},
 		},
 	});
 }
@@ -52,7 +55,7 @@ export class ProfilesController implements interfaces.Controller {
 		}
 	}
 
-	@httpPost('/', ...ProfileValidator.config)
+	@httpPost('/', ...ProfileValidator())
 	private async create(
 		@request() req: Request,
 		@response() res: Response,
