@@ -9,18 +9,17 @@ import { CRUD } from '../util';
 export interface ProfileFields {
 	readonly id?: string;
 	readonly username?: string;
-	readonly joined?: Date;
+	readonly joined?: number;
 }
 
 export interface ProfileConfig extends ProfileFields {
 	readonly username: string;
 }
 
-export class Profile implements ProfileConfig {
+export class Profile implements Omit<ProfileConfig, 'joined'> {
 	public readonly id?: string;
 	public readonly username: string;
 	public readonly joined: Date;
-
 	public get hasId(): boolean {
 		return !!this.id;
 	}
@@ -28,20 +27,20 @@ export class Profile implements ProfileConfig {
 	constructor(config: ProfileConfig) {
 		this.id = config.id;
 		this.username = config.username;
-		this.joined = config.joined ? config.joined : new Date();
+		this.joined = config.joined ? new Date(config.joined) : new Date();
 	}
 
 	toJson(): Object {
 		return {
 			username: this.username,
-			joined: this.joined.toUTCString(),
+			joined: this.joined.getTime(),
 		};
 	}
 
 	static fromJson(json: any): Profile {
 		const username: string = json.username;
 		const id = json.id;
-		const joined = json.joined ? new Date(json.joined) : undefined;
+		const joined = json.joined;
 		return new Profile({ id, username, joined });
 	}
 }
@@ -114,35 +113,31 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		prevUsername: string,
 		fields: ProfileFields,
 	): Promise<Profile | void> {
-		try {
-			await this.store.runTransaction(async (t) => {
-				// verify user with prevUsername exists
-				const snapshots = await t.get(
-					this.profiles.where('username', '==', prevUsername),
+		await this.store.runTransaction(async (t) => {
+			// verify user with prevUsername exists
+			const snapshots = await t.get(
+				this.profiles.where('username', '==', prevUsername),
+			);
+			const prevDocs = snapshots.docs;
+			if (!prevDocs.length) throw 404;
+			const prevSnapshot = prevDocs[0];
+
+			// verify that the proposed alternate username is available
+			if (fields.username) {
+				const matchingSnapshots = await t.get(
+					this.profiles.where('username', '==', fields.username).limit(1),
 				);
-				const prevDocs = snapshots.docs;
-				if (!prevDocs.length) throw 404;
-				const prevSnapshot = prevDocs[0];
-
-				// verify that the proposed alternate username is available
-				if (fields.username) {
-					const matchingSnapshots = await t.get(
-						this.profiles.where('username', '==', fields.username).limit(1),
-					);
-					const matchingDocs = matchingSnapshots.docs;
-					if (matchingDocs.length) {
-						throw new Error('Proposed username is already taken');
-					}
+				const matchingDocs = matchingSnapshots.docs;
+				if (matchingDocs.length) {
+					throw new Error('Proposed username is already taken');
 				}
+			}
 
-				// update document with new fields
-				await t.update(prevSnapshot.ref, fields);
-			});
-			const username = fields.username ? fields.username : prevUsername;
-			return await this.read(username);
-		} catch (_) {
-			return;
-		}
+			// update document with new fields
+			await t.update(prevSnapshot.ref, fields);
+		});
+		const username = fields.username ? fields.username : prevUsername;
+		return await this.read(username);
 	}
 
 	async delete(username: string): Promise<boolean> {

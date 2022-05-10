@@ -40,12 +40,8 @@ function ProfileValidator(usernameOptional: boolean = false) {
 		joined: {
 			optional: true,
 			in: 'body',
-			custom: {
-				options: (joined) => {
-					const epoch = Date.parse(joined);
-					return !Number.isNaN(epoch);
-				},
-			},
+			errorMessage: 'Joined should be a timestamp since epoch in ms',
+			isNumeric: true,
 		},
 	});
 }
@@ -128,11 +124,15 @@ export class ProfilesController implements interfaces.Controller {
 		if (!errors.isEmpty()) {
 			res.status(422).send({ errors: errors.array() });
 		} else {
-			const doc = await this.profilesRepo.patch(prevUsername, fields);
-			if (!doc) {
-				res.status(404).send();
-			} else {
-				res.status(200).send(doc);
+			try {
+				const doc = await this.profilesRepo.patch(prevUsername, fields);
+				if (!doc) {
+					res.status(404).send();
+				} else {
+					res.status(200).send(doc);
+				}
+			} catch (err) {
+				res.status(500).send(JSON.stringify(err));
 			}
 		}
 	}
