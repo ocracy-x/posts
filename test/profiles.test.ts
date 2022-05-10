@@ -84,6 +84,17 @@ describe('Profiles', () => {
 	});
 
 	describe('PATCH /profile/:prevUsername', () => {
+		it('should validate timestamp', (done) => {
+			chai
+				.request(app)
+				.patch('/api/v1/profiles/test')
+				.send({ joined: 'not a timestamp' })
+				.end((_, res) => {
+					res.should.have.status(422);
+					done();
+				});
+		});
+
 		it('should change timestamp', (done) => {
 			const time = 1;
 			chai
