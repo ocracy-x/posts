@@ -112,13 +112,37 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 
 	async patch(
 		prevUsername: string,
-		config: ProfileFields,
+		fields: ProfileFields,
 	): Promise<Profile | void> {
-		const ref = await this.getRef(prevUsername);
-		if (!ref) return;
-		await ref.update(config);
-		const doc = await ref.get();
-		return doc.data();
+		try {
+			await this.store.runTransaction(async (t) => {
+				// verify user with prevUsername exists
+				const snapshots = await t.get(
+					this.profiles.where('username', '==', prevUsername),
+				);
+				const prevDocs = snapshots.docs;
+				if (!prevDocs.length) throw 404;
+				const prevSnapshot = prevDocs[0];
+
+				// verify that the proposed alternate username is available
+				if (fields.username) {
+					const matchingSnapshots = await t.get(
+						this.profiles.where('username', '==', fields.username).limit(1),
+					);
+					const matchingDocs = matchingSnapshots.docs;
+					if (matchingDocs.length) {
+						throw new Error('Proposed username is already taken');
+					}
+				}
+
+				// update document with new fields
+				await t.update(prevSnapshot.ref, fields);
+			});
+			const username = fields.username ? fields.username : prevUsername;
+			return await this.read(username);
+		} catch (_) {
+			return;
+		}
 	}
 
 	async delete(username: string): Promise<boolean> {
