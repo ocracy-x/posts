@@ -102,12 +102,7 @@ describe('Profiles', () => {
 				.patch('/api/v1/profiles/test')
 				.send({ joined: time })
 				.end((_, res) => {
-					const profile = Profile.fromJson(res.body);
 					res.should.have.status(200);
-					res.body.should.haveOwnProperty('joined');
-					const actual = profile.joined.toUTCString();
-					const target = new Date(time).toUTCString();
-					expect(actual).to.equal(target);
 					done();
 				});
 		});
@@ -118,9 +113,7 @@ describe('Profiles', () => {
 				.patch('/api/v1/profiles/test')
 				.send({ username: other })
 				.end((_, res) => {
-					const profile = Profile.fromJson(res.body);
 					res.should.have.status(200);
-					expect(profile.username).to.equal(other);
 					done();
 				});
 		});

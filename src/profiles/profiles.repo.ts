@@ -109,11 +109,9 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 		return doc.data();
 	}
 
-	async patch(
-		prevUsername: string,
-		fields: ProfileFields,
-	): Promise<Profile | void> {
+	async patch(prevUsername: string, fields: ProfileFields): Promise<void> {
 		await this.store.runTransaction(async (t) => {
+			// reads:
 			// verify user with prevUsername exists
 			const snapshots = await t.get(
 				this.profiles.where('username', '==', prevUsername),
@@ -128,16 +126,13 @@ export class FirestoreProfilesRepo extends ProfilesRepo {
 					this.profiles.where('username', '==', fields.username).limit(1),
 				);
 				const matchingDocs = matchingSnapshots.docs;
-				if (matchingDocs.length) {
-					throw new Error('Proposed username is already taken');
-				}
+				if (matchingDocs.length) throw 400;
 			}
 
+			// writes:
 			// update document with new fields
 			await t.update(prevSnapshot.ref, fields);
 		});
-		const username = fields.username ? fields.username : prevUsername;
-		return await this.read(username);
 	}
 
 	async delete(username: string): Promise<boolean> {
