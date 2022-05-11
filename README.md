@@ -1,10 +1,10 @@
-# Posts Service API
+# Users Service API
 
-> Persist, organize, and serve user-generated content such as: **posts**, **comments**, **votes**
+> Persist, manage, and serve **user profiles** for Ocracy
 
-# Product Documentation
+# Product
 
-* [Product requirements document - Ocracy](https://ocracy.notion.site/Posts-Service-Requirements-6176091f9f91488ebcfbcef9308d0d6a)
+* [Ocracy API Requirements](https://ocracy.notion.site/Ocracy-API-Requirements-6176091f9f91488ebcfbcef9308d0d6a)
 
 # Development Resources
 
@@ -36,7 +36,7 @@
 * [Types of testing - perfecto.io](https://www.perfecto.io/resources/types-of-testing)
 * [CI / CD - Sten Pittet, Atlassian](https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing)
 
-### Useful docs
+### Docs
 * [node](https://nodejs.org/en/docs/)
 * [typescript](https://www.typescriptlang.org/docs/handbook/2/classes.html)
 * [express](https://expressjs.com/en/4x/api.html)
