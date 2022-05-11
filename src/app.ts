@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
 import { Container } from 'inversify';
 import { InversifyExpressServer } from 'inversify-express-utils';
 
@@ -26,7 +25,9 @@ server.setConfig((app) => {
 	app.use(cors());
 	app.use(express.json());
 	app.use(helmet());
-	app.use(morgan('tiny'));
+	if (process.env.NODE_ENV != 'production') {
+		app.use(require('morgan')('tiny'));
+	}
 });
 
 // build server
