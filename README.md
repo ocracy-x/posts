@@ -24,7 +24,9 @@
 
 ### Cloud Computing and Databases 
 * [What is RDBMS - Oracle](https://www.oracle.com/database/what-is-a-relational-database/)
-* [Cloud Firestore for Node.js - Google](https://cloud.google.com/nodejs/docs)
+* [Cloud Firestore for Node.js](https://cloud.google.com/nodejs/docs)
+* [Cloud Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs)
+* [Cloud Memorystore for Redis](https://cloud.google.com/memorystore/docs/redis)
 
 ### Testing
 * [Behavior driven development (BDD) - Wikipedia](https://en.wikipedia.org/wiki/Behavior-driven_development)
@@ -46,6 +48,6 @@
 * [travis ci](https://docs.travis-ci.com/)
 * [DOMPurify](https://github.com/cure53/DOMPurify)
 * [firebase-admin](https://firebase.google.com/docs/firestore)
-* [@cloud-cloud/firestore](https://cloud.google.com/nodejs/docs/reference/firestore/latest)
+* [@google-cloud/firestore](https://cloud.google.com/nodejs/docs/reference/firestore/latest)
 * [express-validator](https://express-validator.github.io/docs/index.html)
 * [http codes - mdn](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
