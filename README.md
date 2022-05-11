@@ -22,7 +22,7 @@
 * [Microservices - Atlassian](https://www.atlassian.com/continuous-delivery/microservices)
 * [Microservices - Martin Fowler](https://martinfowler.com/articles/microservices.html)
 
-### Cloud Computing and Databases 
+### Cloud Computing and Databases
 * [What is RDBMS - Oracle](https://www.oracle.com/database/what-is-a-relational-database/)
 * [Cloud Firestore for Node.js](https://cloud.google.com/nodejs/docs)
 * [Cloud Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs)
