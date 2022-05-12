@@ -6,7 +6,7 @@
   "scripts": {
     "start": "NODE_ENV=production node dist/index.js",
     "dev": "nodemon index.ts",
-    "build": "tsc",
+    "build": "npm test && tsc",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
     "seed": "node dist/seed.js",
     "firestore": "ts-node confirm_firestore.ts"
